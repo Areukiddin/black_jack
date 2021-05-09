@@ -1,9 +1,10 @@
 require_relative 'card'
 
 class Player
-  attr_reader :name, :hand, :bank, :score, :bet
+  attr_reader :name
+  attr_accessor :cash, :hand, :score, :bet
 
-  def initialize(name = 'Robot')
+  def initialize(name = 'Dealer')
     @name = name
     @cash = 100
     @hand = []
@@ -20,8 +21,17 @@ class Player
     @hand << card.simple_view
     @score += if @hand.length < 3 && !card.name.eql?('A')
                 card.value[0]
-              elsif @hand.length < 3 && card.name.eql?('A')
+              elsif (@hand.length < 3 && card.name.eql?('A')) || (card.name.eql?('A') && still_less_then_21?(card))
                 card.value[1]
+              else card.value[0]
               end
+  end
+
+  def score_less_then_21?
+    return true if @score <= 21
+  end
+
+  def still_less_then_21?(card)
+    return true if @score + card.value[1] <= 21
   end
 end
