@@ -24,6 +24,7 @@ class Main
       when '3'
         option(menu_open_cards)
       end
+      @game.end_game if @game.started && @player.hand.length == 3 && @robot.hand.length == 3
     end
   end
 
@@ -44,10 +45,10 @@ class Main
   end
 
   def menu_take_card
-    unless @game.restart_enabled
-      @game.give_card(@player)
-      @game.give_card(@robot) if @robot.card_needed?
-    end
+    return if @game.restart_enabled
+
+    @game.give_card(@player) if @player.still_less_then_21?
+    @game.give_card(@robot) if @robot.card_needed?
   end
 
   def menu_open_cards
@@ -67,19 +68,19 @@ class Main
 
   def main_menu
     puts 'Нажмите s для старта' unless @game&.started
-    if @game&.started
-      puts 'Игровые команды:
-      1 - Пропустить ход
-      2 - Взять карту
-      3 - Открыть карты
-      0 - Выйти из игры'
-      puts
-      puts "У вас #{@player.score} очков"
-      puts @player.hand.to_s unless @player.hand.length.zero?
-      puts "Ваш счёт: #{@player.cash}$                 Счёт дилера: #{@robot.cash}$"
-      puts "                Банк: #{@game.bank}$"
-      puts 'Нажмите r для новой игры' if @game.restart_enabled
-    end
+    return unless @game&.started
+
+    puts 'Игровые команды:
+    1 - Пропустить ход
+    2 - Взять карту
+    3 - Открыть карты
+    0 - Выйти из игры'
+    puts
+    puts "У вас #{@player.score} очков"
+    puts @player.hand.to_s unless @player.hand.length.zero?
+    puts "Ваш счёт: #{@player.cash}$                 Счёт дилера: #{@robot.cash}$"
+    puts "                Банк: #{@game.bank}$"
+    puts 'Нажмите r для новой игры' if @game.restart_enabled
   end
 end
 

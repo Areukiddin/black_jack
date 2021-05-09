@@ -42,10 +42,10 @@ class Game
   end
 
   def end_game
-    if @player.score > @robot.score && @player.score_less_then_21? || !@robot.score_less_then_21?
+    if player_win?
       @player.cash += @bank
       puts "#{@player.name} победил!"
-    elsif @player.score < @robot.score && @robot.score_less_then_21? || !@player.score_less_then_21?
+    elsif dealer_win?
       @robot.cash += @bank
       puts "#{@robot.name} победил!"
     else
@@ -55,6 +55,20 @@ class Game
     end
     puts "У дилера: #{@robot.score}"
     puts @robot.hand.to_s
+    refresh_stats
+  end
+
+  private
+
+  def player_win?
+    return true if @player.score > @robot.score && @player.score_less_then_21? || !@robot.score_less_then_21?
+  end
+
+  def dealer_win?
+    return true if @player.score < @robot.score && @robot.score_less_then_21? || !@player.score_less_then_21?
+  end
+
+  def refresh_stats
     @bank = 0
     @player.hand = []
     @player.score = 0
