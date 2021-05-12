@@ -77,10 +77,12 @@ class Interface
 
   def restart_game
     puts 'Нажмите r чтобы начать заново'
+    puts 'Нажмите q чтобы выйти'
   end
 
   def exit_game
     puts 'Пока!'
+    exit
   end
 
   private
