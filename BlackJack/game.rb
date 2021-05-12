@@ -1,33 +1,64 @@
-require_relative 'deck'
-require_relative 'player'
-require_relative 'robot'
-
 class Game
-  attr_reader :started, :bank, :restart_enabled
+  attr_reader :started, :bank
 
-  def initialize
+  def initialize(interface)
     @bank = 0
     @started = false
-    @restart_enabled = false
+    @interface = interface
+    @interface.start_commands
+    while (code = gets.strip)
+      game_continue(code)
+    end
   end
 
-  def start(name)
+  def game_continue(code)
+    case code
+    when 's'
+      start
+    when '1'
+      skip_turn(code)
+    when '2'
+      give_card(code)
+    when '3'
+      game_end
+    when 'r'
+      @interface.restart_game
+      restart(code)
+    when 'q'
+      @interface.exit_game
+    end
+    game_end if three_cards
+  end
+
+  def start
     @deck = Deck.new
     @robot = Robot.new
-    @player = Player.new(name)
-    initial_deal
-    take_bet
-    @started = true
+    @player = Player.new(@interface.player_name)
+    prepare_round
   end
 
-  def restart
-    initial_deal
-    take_bet
-    @restart_enabled = false
+  def game_hud
+    system('clear')
+    @interface.game_commands
+    @interface.player_hud(@player, @started)
+    @interface.player_hud(@robot, @started)
+    @interface.show_bank(@bank)
   end
 
-  def give_card(player)
-    player.take(@deck.cards.pop)
+  def restart(command)
+    (return unless command.eql?('r'))
+    system('clear')
+    prepare_round
+  end
+
+  def skip_turn(command)
+    @robot.take(@deck.cards.pop) if command == '1' && @robot.card_needed?
+    game_hud
+  end
+
+  def give_card(command)
+    @player.take(@deck.cards.pop) if command == '2'
+    game_hud
   end
 
   def initial_deal
@@ -41,39 +72,67 @@ class Game
     @bank = @robot.bet + @player.bet
   end
 
-  def end_game
+  def game_end
+    system('clear')
     if player_win?
-      @player.cash += @bank
-      puts "#{@player.name} победил!"
+      @player.take_cash(bank)
+      @interface.congrats(@player)
     elsif dealer_win?
-      @robot.cash += @bank
-      puts "#{@robot.name} победил!"
+      @robot.take_cash(bank)
+      @interface.congrats(@robot)
     else
-      @player.cash += @bank / 2
-      @robot.cash += @bank / 2
-      puts 'Ничья!'
+      @player.take_cash(@bank / 2)
+      @robot.take_cash(@bank / 2)
+      @interface.draw
     end
-    puts "У дилера: #{@robot.score}"
-    puts @robot.hand.to_s
-    refresh_stats
+    @started = false
+    show_result
   end
 
   private
 
+  def prepare_round
+    initial_deal
+    take_bet
+    @started = true
+    game_hud
+  end
+
+  def both_less21
+    @robot.score_less_then_21? && @player.score_less_then_21?
+  end
+
+  def player_over21
+    @robot.score_less_then_21? && !@player.score_less_then_21?
+  end
+
+  def dealer_over21
+    @player.score_less_then_21? && !@robot.score_less_then_21?
+  end
+
   def player_win?
-    return true if @player.score > @robot.score && @player.score_less_then_21? || !@robot.score_less_then_21?
+    return true if (both_less21 && @player.score > @robot.score) || dealer_over21
   end
 
   def dealer_win?
-    return true if @player.score < @robot.score && @robot.score_less_then_21? || !@player.score_less_then_21?
+    return true if (both_less21 && @player.score < @robot.score) || player_over21
+  end
+
+  def three_cards
+    @robot&.hand&.length == 3 && @player&.hand&.length == 3
+  end
+
+  def show_result
+    @interface.player_hud(@player, @started)
+    @interface.player_hud(@robot, @started)
+    refresh_stats
+    @player.reset
+    @robot.reset
+    @interface.restart_game
   end
 
   def refresh_stats
     @bank = 0
-    @player.hand = []
-    @player.score = 0
-    @robot.hand = []
-    @robot.score = 0
-    @restart_enabled = true
+    @deck = Deck.new
   end
 end

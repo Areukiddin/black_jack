@@ -19,12 +19,19 @@ class Player
 
   def take(card)
     @hand << card.simple_view
-    @score += if @hand.length < 3 && !card.name.eql?('A')
-                card.value[0]
-              elsif (@hand.length < 3 && card.name.eql?('A')) || (card.name.eql?('A') && still_less_then_21?(card))
+    @score += if (@hand.length < 3 && card.name.eql?('A')) || still_less_then_21?(card)
                 card.value[1]
               else card.value[0]
               end
+  end
+
+  def take_cash(bank)
+    @cash += bank
+  end
+
+  def reset
+    @hand = []
+    @score = 0
   end
 
   def score_less_then_21?
@@ -32,6 +39,6 @@ class Player
   end
 
   def still_less_then_21?(card)
-    return true if @score + card.value[1] <= 21
+    return true if card.name.eql?('A') && @score + card.value[1] <= 21
   end
 end
