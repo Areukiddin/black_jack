@@ -47,7 +47,9 @@ class Interface
   end
 
   def show_cards(player, started)
-    puts "Рука игрока #{player.name}: #{dealer?(player.name) && started ? '*' * player.hand.cards.length : player.hand.cards}"
+    name = player.name
+    cards = player.hand.cards
+    puts "Рука игрока #{name}: #{dealer?(name) && started ? '*' * cards.length : simple_view(cards)}"
   end
 
   def show_score(score)
@@ -89,5 +91,9 @@ class Interface
 
   def dealer?(name)
     name.eql?('Dealer')
+  end
+
+  def simple_view(cards)
+    cards.map { |card| "|#{card.name + card.suit}|" }.join(' ')
   end
 end

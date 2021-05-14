@@ -7,7 +7,7 @@ class Hand
   end
 
   def take(card)
-    @cards << card.simple_view
+    @cards << card
     @score += if card.name.eql?('A') && !still_less_then_21?(card)
                 card.value - 10
               else

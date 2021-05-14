@@ -1,6 +1,5 @@
-# rubocop:disable Lint/MissingSuper
-
-class Deck < Card
+class Deck
+  include Constants
   attr_accessor :cards
 
   def initialize
@@ -17,5 +16,3 @@ class Deck < Card
     @cards.shuffle!
   end
 end
-
-# rubocop:enable Lint/MissingSuper
