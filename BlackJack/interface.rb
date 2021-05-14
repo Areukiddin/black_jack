@@ -41,13 +41,13 @@ class Interface
   end
 
   def player_hud(player, started)
-    show_cards(player.hand, player, started)
-    show_score(player.score) if !started || !dealer?(player.name) && started
+    show_cards(player, started)
+    show_score(player.hand.score) if !started || !dealer?(player.name) && started
     show_money(player.cash)
   end
 
-  def show_cards(cards, player, started)
-    puts "Рука игрока #{player.name}: #{dealer?(player.name) && started ? '*' * cards.length : cards}"
+  def show_cards(player, started)
+    puts "Рука игрока #{player.name}: #{dealer?(player.name) && started ? '*' * player.hand.cards.length : player.hand.cards}"
   end
 
   def show_score(score)

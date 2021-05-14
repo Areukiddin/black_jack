@@ -52,18 +52,18 @@ class Game
   end
 
   def skip_turn(command)
-    @robot.take(@deck.cards.pop) if command == '1' && @robot.card_needed?
+    @robot.hand.take(@deck.cards.pop) if command == '1' && @robot.card_needed?
     game_hud
   end
 
   def give_card(command)
-    @player.take(@deck.cards.pop) if command == '2'
+    @player.hand.take(@deck.cards.pop) if command == '2'
     game_hud
   end
 
   def initial_deal
-    2.times { @robot.take(@deck.cards.pop) }
-    2.times { @player.take(@deck.cards.pop) }
+    2.times { @robot.hand.take(@deck.cards.pop) }
+    2.times { @player.hand.take(@deck.cards.pop) }
   end
 
   def take_bet
@@ -99,35 +99,35 @@ class Game
   end
 
   def both_less21
-    @robot.score_less_then_21? && @player.score_less_then_21?
+    @robot.hand.score_less_then_21? && @player.hand.score_less_then_21?
   end
 
   def player_over21
-    @robot.score_less_then_21? && !@player.score_less_then_21?
+    @robot.hand.score_less_then_21? && !@player.hand.score_less_then_21?
   end
 
   def dealer_over21
-    @player.score_less_then_21? && !@robot.score_less_then_21?
+    @player.hand.score_less_then_21? && !@robot.hand.score_less_then_21?
   end
 
   def player_win?
-    return true if (both_less21 && @player.score > @robot.score) || dealer_over21
+    return true if (both_less21 && @player.hand.score > @robot.hand.score) || dealer_over21
   end
 
   def dealer_win?
-    return true if (both_less21 && @player.score < @robot.score) || player_over21
+    return true if (both_less21 && @player.hand.score < @robot.hand.score) || player_over21
   end
 
   def three_cards
-    @robot&.hand&.length == 3 && @player&.hand&.length == 3
+    @robot&.hand&.cards&.length == 3 && @player&.hand&.cards&.length == 3
   end
 
   def show_result
     @interface.player_hud(@player, @started)
     @interface.player_hud(@robot, @started)
     refresh_stats
-    @player.reset
-    @robot.reset
+    @player.hand = Hand.new
+    @robot.hand = Hand.new
     @interface.restart_game
   end
 
